@@ -5,6 +5,7 @@
 // August 29, 2016
 #include <stdint.h>
 #include "eDisk.h"
+#include "FlashProgram.h"
 
 uint8_t Buff[512]; // temporary buffer used during file I/O
 uint8_t Directory[256], FAT[256];
@@ -27,7 +28,16 @@ void MountDirectory(void){
 // if bDirectoryLoaded is 1, simply return
 // **write this function**
 
-  
+  if(bDirectoryLoaded == 0)
+	{
+		eDisk_ReadSector(Buff, 255);
+		for(uint16_t i=0; i<256; i++)
+		{
+			Directory[i] = Buff[i];
+			FAT[i] = Buff[i+256];
+		}
+		bDirectoryLoaded = 1;
+	}
 	
 }
 
@@ -136,6 +146,11 @@ uint8_t OS_File_Format(void){
 // call eDiskFormat
 // clear bDirectoryLoaded to zero
 // **write this function**
-
-  return 0; // replace this line
+	uint32_t address;
+	address = 0X00020000; //start of disk
+	while(address <= 0X00040000){
+		Flash_Erase(address);
+		address = address + 1024;
+	}
+	return 0; // replace this line
 }
